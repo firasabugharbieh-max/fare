@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>مراقب الأجرة - تعرفة هيئة النقل البري</title>
+<style>
+:root{--bg:#f6f5f1;--card:#fff;--tx:#1b1b1b;--mu:#6b6b6b;--ac:#0b6b4f;--bd:#e2e0d8;--bad:#b3261e;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121212;--card:#1d1d1d;--tx:#eee;--mu:#9a9a9a;--ac:#3ecf9b;--bd:#333;--bad:#ff8a80}}
+:root[data-theme="dark"]{--bg:#121212;--card:#1d1d1d;--tx:#eee;--mu:#9a9a9a;--ac:#3ecf9b;--bd:#333;--bad:#ff8a80}
+html,body{margin:0;background:var(--bg);color:var(--tx);font-family:system-ui,-apple-system,"Segoe UI",Tahoma,Arial,sans-serif}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+.w{max-width:480px;margin:0 auto;padding:14px}
+.c{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:14px;margin-bottom:12px}
+h1{font-size:18px;margin:4px 0 12px}h2{font-size:15px;margin:0 0 10px}
+.big{font-size:52px;font-weight:700;color:var(--ac);text-align:center;line-height:1.1}
+.sub{text-align:center;color:var(--mu);font-size:13px}
+.g{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:12px;text-align:center}
+.g b{display:block;font-size:20px}.g span{font-size:12px;color:var(--mu)}
+button{font:inherit;border:0;border-radius:12px;padding:14px;width:100%;font-size:18px;font-weight:600;background:var(--ac);color:#fff}
+button.s{background:var(--bad)}
+input[type=number]{font:inherit;width:100%;box-sizing:border-box;padding:10px;border:1px solid var(--bd);border-radius:10px;background:var(--bg);color:var(--tx);font-size:18px}
+label{display:block;font-size:13px;color:var(--mu);margin:8px 0 4px}
+.row{display:flex;gap:8px}.row>div{flex:1}
+.chk{display:flex;gap:8px;align-items:center;margin-top:10px;font-size:14px;color:var(--tx)}
+.badge{display:inline-block;padding:2px 10px;border-radius:99px;background:var(--bd);font-size:12px}
+.v{margin-top:10px;padding:10px;border-radius:10px;background:var(--bg);text-align:center;font-weight:600}
+.n{font-size:12px;color:var(--mu);line-height:1.7}
+table{width:100%;border-collapse:collapse;font-size:13px}td,th{padding:5px;border-bottom:1px solid var(--bd);text-align:center}
+</style>
+</head>
+<body>
+<div class="w">
+<h1>مراقب الأجرة <span class="badge" id="mode">نهاري</span></h1>
+
+<div class="c">
+  <div class="big" id="fare">0.000</div>
+  <div class="sub">دينار أردني (حسب تعرفة التطبيقات) · <span id="status">جاهز</span></div>
+  <div class="g">
+    <div><b id="km">0.00</b><span>كم</span></div>
+    <div><b id="wt">00:00</b><span>انتظار</span></div>
+    <div><b id="sp">0</b><span>كم/س</span></div>
+  </div>
+  <div class="chk"><input type="checkbox" id="slow" checked><label for="slow" style="margin:0;color:inherit">احسب المسافة كمان وقت الانتظار (≤ ١٧ كم/س)</label></div>
+  <div style="margin-top:12px"><button id="go">ابدأ الرحلة</button></div>
+  <div id="err" class="n" style="color:var(--bad);margin-top:8px"></div>
+</div>
+
+<div class="c">
+  <h2>قارن مع التطبيق</h2>
+  <label>سعر التطبيق (دينار)</label>
+  <input type="number" id="app" step="0.01" inputmode="decimal" placeholder="مثال: 3.50">
+  <div class="v" id="verdict">دخّل سعر التطبيق للمقارنة</div>
+</div>
+
+<div class="c">
+  <h2>حاسبة يدوية (بدون GPS)</h2>
+  <div class="row">
+    <div><label>المسافة (كم)</label><input type="number" id="mk" step="0.1" inputmode="decimal"></div>
+    <div><label>الانتظار (دقيقة)</label><input type="number" id="mw" step="0.5" inputmode="decimal"></div>
+  </div>
+  <div class="chk"><input type="checkbox" id="mn"><label for="mn" style="margin:0;color:inherit">تعرفة ليلية</label></div>
+  <div class="v" id="mres">—</div>
+</div>
+
+<div class="c">
+  <h2>التعرفة المعتمدة (قرش)</h2>
+  <table><tr><th></th><th>نهاري</th><th>ليلي</th></tr>
+  <tr><td>فتحة العداد</td><td>46.8</td><td>48</td></tr>
+  <tr><td>الكيلومتر</td><td>33.6</td><td>39.6</td></tr>
+  <tr><td>انتظار/دقيقة</td><td>5.76</td><td>6.79</td></tr></table>
+  <p class="n">الليلي من ١٠ مساءً حتى ٦ صباحاً. الانتظار يُحسب عندما تكون السرعة ≤ ١٧ كم/س. اترك الشاشة شغّالة والصفحة مفتوحة أثناء الرحلة. دقة GPS تعطي فرق بسيط (٢–٥٪) فالمقارنة تقريبية.</p>
+</div>
+</div>
+
+<script>
+const R={d:{o:46.8,k:33.6,w:5.76},n:{o:48,k:39.6,w:6.79}};
+const $=id=>document.getElementById(id);
+const night=()=>{const h=new Date().getHours();return h>=22||h<6};
+const rate=()=>night()?R.n:R.d;
+let s,watch,tick,lock;
+function reset(){s={fare:0,km:0,wait:0,speed:0,run:false,last:null,lastT:0,tk:0}}
+reset();
+function show(){
+  $('fare').textContent=(s.fare/100).toFixed(3);
+  $('km').textContent=s.km.toFixed(2);
+  const m=Math.floor(s.wait/60),x=Math.floor(s.wait%60);
+  $('wt').textContent=String(m).padStart(2,'0')+':'+String(x).padStart(2,'0');
+  $('sp').textContent=Math.round(s.speed);
+  $('mode').textContent=night()?'ليلي':'نهاري';
+  cmp();
+}
+function cmp(){
+  const a=parseFloat($('app').value),f=s.fare/100,v=$('verdict');
+  if(!a||!f){v.textContent='دخّل سعر التطبيق للمقارنة';v.style.color='';return}
+  const d=a-f,p=d/f*100;
+  if(Math.abs(p)<=5){v.textContent='السعر قريب من التعرفة ✓ (فرق '+d.toFixed(3)+' د)';v.style.color='var(--ac)'}
+  else if(d>0){v.textContent='التطبيق أعلى بـ '+d.toFixed(3)+' دينار ('+p.toFixed(0)+'٪)';v.style.color='var(--bad)'}
+  else{v.textContent='التطبيق أقل بـ '+Math.abs(d).toFixed(3)+' دينار';v.style.color='var(--ac)'}
+}
+function hav(a,b,c,d){const r=x=>x*Math.PI/180,R=6371000;const h=Math.sin(r(c-a)/2)**2+Math.cos(r(a))*Math.cos(r(c))*Math.sin(r(d-b)/2)**2;return 2*R*Math.asin(Math.sqrt(h))}
+function onPos(p){
+  const c=p.coords,t=p.timestamp;
+  if(c.accuracy>50)return;
+  let sp=0,d=0;
+  if(s.last){
+    d=hav(s.last.lat,s.last.lon,c.latitude,c.longitude);
+    const dt=(t-s.last.t)/1000;
+    sp=(c.speed!=null&&c.speed>=0)?c.speed*3.6:(dt>0?d/dt*3.6:0);
+    if(sp>200){s.last={lat:c.latitude,lon:c.longitude,t};return}
+    if(d<Math.max(3,c.accuracy*0.3)&&sp<3){d=0;sp=0}
+  }
+  s.speed=sp;s.lastT=Date.now();
+  s.last={lat:c.latitude,lon:c.longitude,t};
+  if(d>0){
+    s.km+=d/1000;
+    if($('slow').checked||sp>17)s.fare+=d/1000*rate().k;
+  }
+  show();
+}
+function onTick(){
+  const now=Date.now(),dt=s.tk?(now-s.tk)/1000:1;s.tk=now;
+  if(!s.run)return;
+  if(now-s.lastT>8000)s.speed=0;
+  const w=s.speed<=17;
+  if(w){s.wait+=dt;s.fare+=dt/60*rate().w}
+  $('status').textContent=w?'انتظار':'سير';
+  show();
+}
+function why(e){
+  const fr=window.self!==window.top,fl=location.protocol==='file:';
+  if(e.code===1){
+    if(fl)return 'الصفحة مفتوحة كملف محلي: كروم بيرفض الموقع تلقائياً بدون ما يسألك. لازم تنفتح من رابط https مستقل.';
+    if(fr)return 'الصفحة داخل إطار: المتصفح بيمنع الموقع بدون ما يسألك. لازم تنفتح من رابط مستقل.';
+    return 'الإذن مرفوض. اضغط القفل جنب الرابط، ثم الأذونات، ثم الموقع، ثم سماح، وأعد تحميل الصفحة.';
+  }
+  if(e.code===2)return 'الموقع غير متاح. فعّل GPS بالجوال.';
+  if(e.code===3)return 'انتهت مهلة تحديد الموقع. جرّب مكان مفتوح وأعد المحاولة.';
+  return e.message;
+}
+async function start(){
+  $('err').textContent='';
+  if(!navigator.geolocation){$('err').textContent='المتصفح ما بدعم GPS. استخدم الحاسبة اليدوية.';return}
+  reset();s.run=true;s.fare=rate().o;s.lastT=Date.now();
+  $('go').textContent='أنهِ الرحلة';$('go').className='s';
+  watch=navigator.geolocation.watchPosition(onPos,e=>{$('err').textContent=why(e)},{enableHighAccuracy:true,maximumAge:0,timeout:15000});
+  tick=setInterval(onTick,1000);
+  try{lock=await navigator.wakeLock.request('screen')}catch(e){}
+  show();
+}
+function stop(){
+  s.run=false;navigator.geolocation.clearWatch(watch);clearInterval(tick);
+  try{lock&&lock.release()}catch(e){}
+  $('go').textContent='رحلة جديدة';$('go').className='';$('status').textContent='انتهت الرحلة';
+}
+$('go').onclick=()=>{ if(s.run)stop(); else start() };
+$('app').oninput=cmp;
+function man(){
+  const k=parseFloat($('mk').value)||0,w=parseFloat($('mw').value)||0,r=$('mn').checked?R.n:R.d;
+  if(!k&&!w){$('mres').textContent='—';return}
+  $('mres').textContent=((r.o+k*r.k+w*r.w)/100).toFixed(3)+' دينار';
+}
+['mk','mw','mn'].forEach(i=>$(i).oninput=man);
+document.addEventListener('visibilitychange',async()=>{if(!document.hidden&&s.run){try{lock=await navigator.wakeLock.request('screen')}catch(e){}}});
+show();
+</script>
+</body>
+</html>
